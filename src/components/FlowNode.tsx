@@ -6,26 +6,26 @@ interface FlowNodeProps {
     icon: string;
     color: string;
     position: { x: number; y: number };
-    type: "start" | "process" | "decision" | "input" | "output" | "end";
+    type: "entity" | "attribute" | "relationship";
+    attributes?: string[];
   };
   isSelected: boolean;
   onClick: () => void;
 }
 
 const FlowNode = ({ process, isSelected, onClick }: FlowNodeProps) => {
+  const baseClasses = `cursor-pointer transition-all duration-300 hover:scale-105 ${
+    isSelected ? "scale-105 drop-shadow-xl" : "drop-shadow-lg"
+  }`;
+
+  const gradientId = `gradient-${process.id}`;
+
   const getShapeComponent = () => {
-    const baseClasses = `cursor-pointer transition-all duration-300 hover:scale-110 ${
-      isSelected ? "scale-110 drop-shadow-xl" : "drop-shadow-lg"
-    }`;
-
-    const gradientId = `gradient-${process.id}`;
-
     switch (process.type) {
-      case "start":
-      case "end":
-        // Овал
+      case "entity":
+        // Прямоугольник для сущностей
         return (
-          <svg width="140" height="80" className={baseClasses}>
+          <svg width="120" height="80" className={baseClasses}>
             <defs>
               <linearGradient
                 id={gradientId}
@@ -34,42 +34,51 @@ const FlowNode = ({ process, isSelected, onClick }: FlowNodeProps) => {
                 x2="100%"
                 y2="100%"
               >
-                <stop offset="0%" stopColor="#6366f1" />
-                <stop offset="100%" stopColor="#3730a3" />
+                <stop offset="0%" stopColor="#3b82f6" />
+                <stop offset="100%" stopColor="#1d4ed8" />
               </linearGradient>
             </defs>
-            <ellipse
-              cx="70"
-              cy="40"
-              rx="65"
-              ry="35"
+            <rect
+              x="5"
+              y="5"
+              width="110"
+              height="70"
+              rx="4"
               fill={`url(#${gradientId})`}
-              stroke={isSelected ? "#8b5cf6" : "transparent"}
-              strokeWidth={isSelected ? "3" : "0"}
+              stroke={isSelected ? "#8b5cf6" : "#1e40af"}
+              strokeWidth="2"
             />
             <text
-              x="70"
-              y="30"
+              x="60"
+              y="25"
               textAnchor="middle"
               className="fill-white text-lg font-semibold"
             >
               {process.icon}
             </text>
             <text
-              x="70"
-              y="50"
+              x="60"
+              y="42"
               textAnchor="middle"
-              className="fill-white text-xs font-medium"
+              className="fill-white text-xs font-bold"
             >
-              {process.title.split(" ").slice(0, 2).join(" ")}
+              {process.title}
+            </text>
+            <text
+              x="60"
+              y="55"
+              textAnchor="middle"
+              className="fill-white text-xs opacity-90"
+            >
+              {process.description}
             </text>
           </svg>
         );
 
-      case "decision":
-        // Ромб
+      case "relationship":
+        // Ромб для связей
         return (
-          <svg width="140" height="100" className={baseClasses}>
+          <svg width="100" height="60" className={baseClasses}>
             <defs>
               <linearGradient
                 id={gradientId}
@@ -83,35 +92,34 @@ const FlowNode = ({ process, isSelected, onClick }: FlowNodeProps) => {
               </linearGradient>
             </defs>
             <polygon
-              points="70,10 130,50 70,90 10,50"
+              points="50,5 90,30 50,55 10,30"
               fill={`url(#${gradientId})`}
-              stroke={isSelected ? "#8b5cf6" : "transparent"}
-              strokeWidth={isSelected ? "3" : "0"}
+              stroke={isSelected ? "#8b5cf6" : "#b45309"}
+              strokeWidth="2"
             />
             <text
-              x="70"
-              y="40"
+              x="50"
+              y="22"
               textAnchor="middle"
-              className="fill-white text-lg font-semibold"
+              className="fill-white text-sm font-semibold"
             >
               {process.icon}
             </text>
             <text
-              x="70"
-              y="60"
+              x="50"
+              y="38"
               textAnchor="middle"
               className="fill-white text-xs font-medium"
             >
-              {process.title.split(" ").slice(0, 2).join(" ")}
+              {process.title.split(" ")[0]}
             </text>
           </svg>
         );
 
-      case "input":
-      case "output":
-        // Параллелограмм
+      case "attribute":
+        // Овал для атрибутов
         return (
-          <svg width="140" height="80" className={baseClasses}>
+          <svg width="80" height="50" className={baseClasses}>
             <defs>
               <linearGradient
                 id={gradientId}
@@ -120,80 +128,42 @@ const FlowNode = ({ process, isSelected, onClick }: FlowNodeProps) => {
                 x2="100%"
                 y2="100%"
               >
-                <stop offset="0%" stopColor="#10b981" />
-                <stop offset="100%" stopColor="#059669" />
+                <stop offset="0%" stopColor="#6b7280" />
+                <stop offset="100%" stopColor="#374151" />
               </linearGradient>
             </defs>
-            <polygon
-              points="20,10 130,10 120,70 10,70"
+            <ellipse
+              cx="40"
+              cy="25"
+              rx="35"
+              ry="20"
               fill={`url(#${gradientId})`}
-              stroke={isSelected ? "#8b5cf6" : "transparent"}
-              strokeWidth={isSelected ? "3" : "0"}
+              stroke={isSelected ? "#8b5cf6" : "#4b5563"}
+              strokeWidth="2"
             />
             <text
-              x="70"
-              y="30"
+              x="40"
+              y="18"
               textAnchor="middle"
-              className="fill-white text-lg font-semibold"
+              className="fill-white text-xs font-semibold"
             >
               {process.icon}
             </text>
             <text
-              x="70"
-              y="50"
+              x="40"
+              y="32"
               textAnchor="middle"
               className="fill-white text-xs font-medium"
             >
-              {process.title.split(" ").slice(0, 2).join(" ")}
+              {process.title.length > 8
+                ? process.title.substring(0, 8) + "..."
+                : process.title}
             </text>
           </svg>
         );
 
-      case "process":
       default:
-        // Прямоугольник
-        return (
-          <svg width="140" height="80" className={baseClasses}>
-            <defs>
-              <linearGradient
-                id={gradientId}
-                x1="0%"
-                y1="0%"
-                x2="100%"
-                y2="100%"
-              >
-                <stop offset="0%" stopColor="#8b5cf6" />
-                <stop offset="100%" stopColor="#7c3aed" />
-              </linearGradient>
-            </defs>
-            <rect
-              x="10"
-              y="10"
-              width="120"
-              height="60"
-              rx="8"
-              fill={`url(#${gradientId})`}
-              stroke={isSelected ? "#8b5cf6" : "transparent"}
-              strokeWidth={isSelected ? "3" : "0"}
-            />
-            <text
-              x="70"
-              y="30"
-              textAnchor="middle"
-              className="fill-white text-lg font-semibold"
-            >
-              {process.icon}
-            </text>
-            <text
-              x="70"
-              y="50"
-              textAnchor="middle"
-              className="fill-white text-xs font-medium"
-            >
-              {process.title.split(" ").slice(0, 2).join(" ")}
-            </text>
-          </svg>
-        );
+        return null;
     }
   };
 

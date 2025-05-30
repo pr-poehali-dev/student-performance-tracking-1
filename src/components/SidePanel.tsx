@@ -1,129 +1,81 @@
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { X } from "lucide-react";
 
 interface SidePanelProps {
   process: {
     id: string;
     title: string;
     description: string;
-    icon: string;
-    color: string;
     details: string;
+    type: "entity" | "attribute" | "relationship";
+    attributes?: string[];
   };
   onClose: () => void;
 }
 
 const SidePanel = ({ process, onClose }: SidePanelProps) => {
-  const getStepInfo = (id: string) => {
-    const stepData: Record<
-      string,
-      { inputs: string[]; outputs: string[]; tools: string[] }
-    > = {
-      registration: {
-        inputs: ["ФИО студента", "Номер студбилета", "Группа", "Специальность"],
-        outputs: ["Профиль студента", "Учётная запись"],
-        tools: ["CRM система", "База данных студентов"],
-      },
-      subjects: {
-        inputs: ["Учебный план", "Семестр", "Специальность"],
-        outputs: ["Список предметов", "Расписание"],
-        tools: ["Электронный деканат", "Система планирования"],
-      },
-      grades: {
-        inputs: ["Результаты тестов", "Оценки преподавателей", "Посещаемость"],
-        outputs: ["Журнал оценок", "Текущий балл"],
-        tools: ["Электронный журнал", "LMS система"],
-      },
-      calculate: {
-        inputs: ["Все оценки", "Веса предметов", "Кредиты"],
-        outputs: ["Средний балл", "GPA", "Процент успеваемости"],
-        tools: ["Калькулятор GPA", "Аналитический модуль"],
-      },
-      rating: {
-        inputs: [
-          "Средние баллы",
-          "Дополнительные достижения",
-          "Участие в олимпиадах",
-        ],
-        outputs: ["Рейтинг группы", "Рейтинг курса", "Общий рейтинг"],
-        tools: ["Система рейтингов", "Модуль сравнения"],
-      },
-      reports: {
-        inputs: ["Данные успеваемости", "Рейтинги", "Статистика"],
-        outputs: ["Ведомости", "Аналитические отчёты", "Графики"],
-        tools: ["Генератор отчётов", "BI инструменты"],
-      },
-    };
-
-    return stepData[id] || { inputs: [], outputs: [], tools: [] };
-  };
-
-  const stepInfo = getStepInfo(process.id);
-
   return (
-    <div className="w-80 animate-slide-in-right">
-      <Card className="shadow-xl">
-        <CardHeader
-          className={`bg-gradient-to-r ${process.color} text-white rounded-t-lg`}
+    <div className="w-80 bg-white rounded-xl shadow-lg p-6">
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-lg font-bold text-gray-800">{process.title}</h3>
+        <button
+          onClick={onClose}
+          className="p-1 hover:bg-gray-100 rounded-full transition-colors"
         >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <span className="text-2xl">{process.icon}</span>
-              <CardTitle className="text-lg">{process.title}</CardTitle>
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onClose}
-              className="text-white hover:bg-white/20"
-            >
-              ✕
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent className="p-6 space-y-4">
-          <div>
-            <h4 className="font-semibold text-gray-800 mb-2">Описание</h4>
-            <p className="text-gray-600 text-sm">{process.details}</p>
-          </div>
+          <X size={20} className="text-gray-600" />
+        </button>
+      </div>
 
+      <div className="space-y-4">
+        <div>
+          <h4 className="font-semibold text-gray-700 mb-2">Тип элемента:</h4>
+          <p className="text-sm text-gray-600 capitalize">
+            {process.type === "entity"
+              ? "Сущность"
+              : process.type === "relationship"
+                ? "Связь"
+                : "Атрибут"}
+          </p>
+        </div>
+
+        <div>
+          <h4 className="font-semibold text-gray-700 mb-2">Описание:</h4>
+          <p className="text-sm text-gray-600">{process.details}</p>
+        </div>
+
+        {process.attributes && process.attributes.length > 0 && (
           <div>
-            <h4 className="font-semibold text-gray-800 mb-2">Входные данные</h4>
-            <ul className="text-sm text-gray-600 space-y-1">
-              {stepInfo.inputs.map((input, index) => (
-                <li key={index} className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 bg-blue-500 rounded-full"></span>
-                  {input}
+            <h4 className="font-semibold text-gray-700 mb-2">Атрибуты:</h4>
+            <ul className="space-y-1">
+              {process.attributes.map((attr, index) => (
+                <li
+                  key={index}
+                  className="text-sm text-gray-600 flex items-center"
+                >
+                  <span className="w-2 h-2 bg-blue-400 rounded-full mr-2"></span>
+                  {attr}
                 </li>
               ))}
             </ul>
           </div>
+        )}
 
-          <div>
-            <h4 className="font-semibold text-gray-800 mb-2">Результаты</h4>
-            <ul className="text-sm text-gray-600 space-y-1">
-              {stepInfo.outputs.map((output, index) => (
-                <li key={index} className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
-                  {output}
-                </li>
-              ))}
-            </ul>
+        {process.type === "entity" && (
+          <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+            <p className="text-xs text-blue-700">
+              💡 В Access эта сущность станет отдельной таблицей с
+              полями-атрибутами
+            </p>
           </div>
+        )}
 
-          <div>
-            <h4 className="font-semibold text-gray-800 mb-2">Инструменты</h4>
-            <ul className="text-sm text-gray-600 space-y-1">
-              {stepInfo.tools.map((tool, index) => (
-                <li key={index} className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 bg-purple-500 rounded-full"></span>
-                  {tool}
-                </li>
-              ))}
-            </ul>
+        {process.type === "relationship" && (
+          <div className="mt-4 p-3 bg-yellow-50 rounded-lg">
+            <p className="text-xs text-yellow-700">
+              🔗 Эта связь определяет отношения между таблицами в базе данных
+            </p>
           </div>
-        </CardContent>
-      </Card>
+        )}
+      </div>
     </div>
   );
 };

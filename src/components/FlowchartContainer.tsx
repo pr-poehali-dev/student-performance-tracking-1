@@ -1,9 +1,8 @@
 import { useState } from "react";
 import FlowNode from "./FlowNode";
-import ProcessCard from "./ProcessCard";
 import SidePanel from "./SidePanel";
 
-interface ProcessStep {
+interface ERElement {
   id: string;
   title: string;
   description: string;
@@ -12,82 +11,182 @@ interface ProcessStep {
   details: string;
   position: { x: number; y: number };
   connections: string[];
-  type: "start" | "process" | "decision" | "input" | "output" | "end";
+  type: "entity" | "attribute" | "relationship";
+  attributes?: string[];
 }
 
 const FlowchartContainer = () => {
   const [selectedNode, setSelectedNode] = useState<string | null>(null);
 
-  const processes: ProcessStep[] = [
+  const erElements: ERElement[] = [
+    // Сущности
     {
-      id: "registration",
-      title: "Регистрация студента",
-      description: "Добавление нового студента в систему",
-      icon: "👤",
+      id: "students",
+      title: "Students",
+      description: "Студенты",
+      icon: "👥",
       color: "from-blue-400 to-blue-600",
-      details: "Внесение персональных данных, группы, специальности",
-      position: { x: 50, y: 100 },
-      connections: ["subjects"],
-      type: "input",
+      details: "Основная информация о студентах учебного заведения",
+      position: { x: 50, y: 150 },
+      connections: ["enrollment", "student_id"],
+      type: "entity",
+      attributes: [
+        "student_id",
+        "last_name",
+        "first_name",
+        "group_id",
+        "phone",
+      ],
+    },
+    {
+      id: "groups",
+      title: "Groups",
+      description: "Группы",
+      icon: "🎓",
+      color: "from-green-400 to-green-600",
+      details: "Учебные группы студентов",
+      position: { x: 300, y: 50 },
+      connections: ["belongs_to", "group_id"],
+      type: "entity",
+      attributes: ["group_id", "group_name", "course", "specialization"],
     },
     {
       id: "subjects",
-      title: "Назначение предметов",
-      description: "Привязка студента к учебным дисциплинам",
+      title: "Subjects",
+      description: "Предметы",
       icon: "📚",
-      color: "from-green-400 to-green-600",
-      details: "Выбор курсов, семестров, преподавателей",
-      position: { x: 300, y: 100 },
-      connections: ["grades"],
-      type: "process",
+      color: "from-purple-400 to-purple-600",
+      details: "Учебные дисциплины",
+      position: { x: 550, y: 150 },
+      connections: ["enrollment", "teaches", "subject_id"],
+      type: "entity",
+      attributes: ["subject_id", "subject_name", "credits", "semester"],
+    },
+    {
+      id: "teachers",
+      title: "Teachers",
+      description: "Преподаватели",
+      icon: "👨‍🏫",
+      color: "from-orange-400 to-orange-600",
+      details: "Преподаватели учебного заведения",
+      position: { x: 550, y: 350 },
+      connections: ["teaches", "teacher_id"],
+      type: "entity",
+      attributes: [
+        "teacher_id",
+        "last_name",
+        "first_name",
+        "department",
+        "position",
+      ],
     },
     {
       id: "grades",
-      title: "Внесение оценок",
-      description: "Фиксация результатов обучения",
+      title: "Grades",
+      description: "Оценки",
       icon: "📝",
-      color: "from-yellow-400 to-orange-500",
-      details: "Контрольные, экзамены, практические работы",
-      position: { x: 550, y: 100 },
-      connections: ["calculate"],
-      type: "input",
+      color: "from-red-400 to-red-600",
+      details: "Результаты обучения студентов",
+      position: { x: 300, y: 350 },
+      connections: ["has_grade"],
+      type: "entity",
+      attributes: ["grade_id", "student_id", "subject_id", "grade", "date"],
     },
+
+    // Связи
     {
-      id: "calculate",
-      title: "Расчёт среднего балла",
-      description: "Автоматический подсчёт GPA",
-      icon: "🧮",
-      color: "from-purple-400 to-purple-600",
-      details: "Взвешенное среднее с учётом кредитов",
-      position: { x: 400, y: 300 },
-      connections: ["rating"],
-      type: "process",
-    },
-    {
-      id: "rating",
-      title: "Формирование рейтинга",
-      description: "Создание общего рейтинга студентов",
-      icon: "🏆",
-      color: "from-red-400 to-pink-600",
-      details: "Сортировка по среднему баллу и достижениям",
-      position: { x: 150, y: 300 },
-      connections: ["reports"],
-      type: "decision",
-    },
-    {
-      id: "reports",
-      title: "Генерация отчётов",
-      description: "Создание аналитических отчётов",
-      icon: "📊",
-      color: "from-indigo-400 to-blue-600",
-      details: "Ведомости, статистика, аналитика успеваемости",
-      position: { x: 50, y: 500 },
+      id: "enrollment",
+      title: "Enrollment",
+      description: "Изучает",
+      icon: "📖",
+      color: "from-yellow-400 to-yellow-600",
+      details: "Связь между студентами и предметами",
+      position: { x: 300, y: 200 },
       connections: [],
-      type: "output",
+      type: "relationship",
+    },
+    {
+      id: "teaches",
+      title: "Teaches",
+      description: "Преподаёт",
+      icon: "🎯",
+      color: "from-indigo-400 to-indigo-600",
+      details: "Связь между преподавателями и предметами",
+      position: { x: 650, y: 250 },
+      connections: [],
+      type: "relationship",
+    },
+    {
+      id: "belongs_to",
+      title: "Belongs",
+      description: "Принадлежит",
+      icon: "🔗",
+      color: "from-pink-400 to-pink-600",
+      details: "Связь между студентами и группами",
+      position: { x: 175, y: 100 },
+      connections: [],
+      type: "relationship",
+    },
+    {
+      id: "has_grade",
+      title: "Has Grade",
+      description: "Имеет оценку",
+      icon: "⭐",
+      color: "from-teal-400 to-teal-600",
+      details: "Связь оценок со студентами и предметами",
+      position: { x: 175, y: 250 },
+      connections: [],
+      type: "relationship",
+    },
+
+    // Ключевые атрибуты
+    {
+      id: "student_id",
+      title: "StudentID",
+      description: "ID студента",
+      icon: "🔑",
+      color: "from-gray-400 to-gray-600",
+      details: "Уникальный идентификатор студента (Primary Key)",
+      position: { x: 50, y: 50 },
+      connections: [],
+      type: "attribute",
+    },
+    {
+      id: "subject_id",
+      title: "SubjectID",
+      description: "ID предмета",
+      icon: "🔑",
+      color: "from-gray-400 to-gray-600",
+      details: "Уникальный идентификатор предмета (Primary Key)",
+      position: { x: 650, y: 50 },
+      connections: [],
+      type: "attribute",
+    },
+    {
+      id: "teacher_id",
+      title: "TeacherID",
+      description: "ID преподавателя",
+      icon: "🔑",
+      color: "from-gray-400 to-gray-600",
+      details: "Уникальный идентификатор преподавателя (Primary Key)",
+      position: { x: 650, y: 450 },
+      connections: [],
+      type: "attribute",
+    },
+    {
+      id: "group_id",
+      title: "GroupID",
+      description: "ID группы",
+      icon: "🔑",
+      color: "from-gray-400 to-gray-600",
+      details: "Уникальный идентификатор группы (Primary Key)",
+      position: { x: 400, y: 50 },
+      connections: [],
+      type: "attribute",
     },
   ];
 
-  const selectedProcess = processes.find((p) => p.id === selectedNode);
+  const selectedElement = erElements.find((e) => e.id === selectedNode);
 
   return (
     <div className="flex gap-6">
@@ -99,35 +198,102 @@ const FlowchartContainer = () => {
               className="absolute inset-0 w-full h-full pointer-events-none"
               style={{ zIndex: 1 }}
             >
-              {processes.map((process) =>
-                process.connections.map((connectionId) => {
-                  const target = processes.find((p) => p.id === connectionId);
-                  if (!target) return null;
+              {/* Связи между сущностями */}
+              <line
+                x1="190"
+                y1="190"
+                x2="260"
+                y2="240"
+                stroke="#8B5CF6"
+                strokeWidth="2"
+              />
+              <line
+                x1="340"
+                y1="240"
+                x2="510"
+                y2="190"
+                stroke="#8B5CF6"
+                strokeWidth="2"
+              />
+              <line
+                x1="590"
+                y1="190"
+                x2="690"
+                y2="290"
+                stroke="#8B5CF6"
+                strokeWidth="2"
+              />
+              <line
+                x1="590"
+                y1="350"
+                x2="650"
+                y2="290"
+                stroke="#8B5CF6"
+                strokeWidth="2"
+              />
+              <line
+                x1="190"
+                y1="150"
+                x2="235"
+                y2="140"
+                stroke="#8B5CF6"
+                strokeWidth="2"
+              />
+              <line
+                x1="340"
+                y1="350"
+                x2="235"
+                y2="290"
+                stroke="#8B5CF6"
+                strokeWidth="2"
+              />
 
-                  return (
-                    <line
-                      key={`${process.id}-${connectionId}`}
-                      x1={process.position.x + 60}
-                      y1={process.position.y + 40}
-                      x2={target.position.x + 60}
-                      y2={target.position.y + 40}
-                      stroke="#8B5CF6"
-                      strokeWidth="2"
-                      strokeDasharray="5,5"
-                      className="animate-pulse"
-                    />
-                  );
-                }),
-              )}
+              {/* Связи с ключевыми атрибутами */}
+              <line
+                x1="120"
+                y1="90"
+                x2="120"
+                y2="150"
+                stroke="#4B5563"
+                strokeWidth="1"
+                strokeDasharray="3,3"
+              />
+              <line
+                x1="690"
+                y1="90"
+                x2="620"
+                y2="150"
+                stroke="#4B5563"
+                strokeWidth="1"
+                strokeDasharray="3,3"
+              />
+              <line
+                x1="690"
+                y1="450"
+                x2="620"
+                y2="390"
+                stroke="#4B5563"
+                strokeWidth="1"
+                strokeDasharray="3,3"
+              />
+              <line
+                x1="470"
+                y1="90"
+                x2="370"
+                y2="90"
+                stroke="#4B5563"
+                strokeWidth="1"
+                strokeDasharray="3,3"
+              />
             </svg>
 
-            <div className="relative min-h-[600px]" style={{ zIndex: 2 }}>
-              {processes.map((process) => (
+            <div className="relative min-h-[500px]" style={{ zIndex: 2 }}>
+              {erElements.map((element) => (
                 <FlowNode
-                  key={process.id}
-                  process={process}
-                  isSelected={selectedNode === process.id}
-                  onClick={() => setSelectedNode(process.id)}
+                  key={element.id}
+                  process={element}
+                  isSelected={selectedNode === element.id}
+                  onClick={() => setSelectedNode(element.id)}
                 />
               ))}
             </div>
@@ -135,9 +301,9 @@ const FlowchartContainer = () => {
         </div>
       </div>
 
-      {selectedProcess && (
+      {selectedElement && (
         <SidePanel
-          process={selectedProcess}
+          process={selectedElement}
           onClose={() => setSelectedNode(null)}
         />
       )}

@@ -6,10 +6,10 @@ const Index = () => {
       <div className="container mx-auto px-4 py-8">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-800 mb-4 font-montserrat">
-            Учёт успеваемости и рейтинга студентов
+            ER-диаграмма: Учёт успеваемости студентов
           </h1>
           <p className="text-lg text-gray-600 font-open-sans">
-            Интерактивная блок-схема образовательного процесса
+            Диаграмма сущность-связь для базы данных Microsoft Access
           </p>
         </div>
         <FlowchartContainer />
