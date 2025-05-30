@@ -12,6 +12,7 @@ interface ProcessStep {
   details: string;
   position: { x: number; y: number };
   connections: string[];
+  type: "start" | "process" | "decision" | "input" | "output" | "end";
 }
 
 const FlowchartContainer = () => {
@@ -27,6 +28,7 @@ const FlowchartContainer = () => {
       details: "Внесение персональных данных, группы, специальности",
       position: { x: 50, y: 100 },
       connections: ["subjects"],
+      type: "input",
     },
     {
       id: "subjects",
@@ -37,6 +39,7 @@ const FlowchartContainer = () => {
       details: "Выбор курсов, семестров, преподавателей",
       position: { x: 300, y: 100 },
       connections: ["grades"],
+      type: "process",
     },
     {
       id: "grades",
@@ -47,6 +50,7 @@ const FlowchartContainer = () => {
       details: "Контрольные, экзамены, практические работы",
       position: { x: 550, y: 100 },
       connections: ["calculate"],
+      type: "input",
     },
     {
       id: "calculate",
@@ -57,6 +61,7 @@ const FlowchartContainer = () => {
       details: "Взвешенное среднее с учётом кредитов",
       position: { x: 400, y: 300 },
       connections: ["rating"],
+      type: "process",
     },
     {
       id: "rating",
@@ -67,6 +72,7 @@ const FlowchartContainer = () => {
       details: "Сортировка по среднему баллу и достижениям",
       position: { x: 150, y: 300 },
       connections: ["reports"],
+      type: "decision",
     },
     {
       id: "reports",
@@ -77,6 +83,7 @@ const FlowchartContainer = () => {
       details: "Ведомости, статистика, аналитика успеваемости",
       position: { x: 50, y: 500 },
       connections: [],
+      type: "output",
     },
   ];
 
